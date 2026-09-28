@@ -1,0 +1,560 @@
+<title>The Toy Box Game</title>
+<style>
+:root{
+  --paper:#eef1f6;
+  --paper-raised:#ffffff;
+  --ink:#1c2333;
+  --ink-soft:#4d5670;
+  --line:#ccd3e0;
+  --amber:#e8a23d;
+  --teal:#2a9d8f;
+  --coral:#e8604c;
+  --violet:#7c6fdb;
+  --amber-bg:#fbf0dd;
+  --teal-bg:#e2f3f1;
+  --coral-bg:#fbe6e2;
+  --violet-bg:#ece9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#161a26;
+    --paper-raised:#1f2434;
+    --ink:#eef0f6;
+    --ink-soft:#a9b0c6;
+    --line:#333c54;
+    --amber:#f0b25c;
+    --teal:#4dc2b3;
+    --coral:#f08672;
+    --violet:#a89bf0;
+    --amber-bg:#3a2f1c;
+    --teal-bg:#1a3532;
+    --coral-bg:#3a2320;
+    --violet-bg:#2b2745;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161a26;
+  --paper-raised:#1f2434;
+  --ink:#eef0f6;
+  --ink-soft:#a9b0c6;
+  --line:#333c54;
+  --amber:#f0b25c;
+  --teal:#4dc2b3;
+  --coral:#f08672;
+  --violet:#a89bf0;
+  --amber-bg:#3a2f1c;
+  --teal-bg:#1a3532;
+  --coral-bg:#3a2320;
+  --violet-bg:#2b2745;
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Nunito Sans', system-ui, sans-serif;
+  padding-inline:20px;
+  padding-block:36px 64px;
+}
+h1,h2,h3{
+  font-family:'Baloo 2', 'Nunito Sans', sans-serif;
+  text-wrap:balance;
+  margin:0;
+}
+.wrap{max-width:920px;margin-inline:auto;}
+
+.hero{margin-bottom:40px;}
+.eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+}
+.hero h1{font-size:clamp(2rem,5vw,2.9rem);font-weight:700;color:var(--ink);}
+.hero p{
+  font-size:1.05rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+  max-width:65ch;
+  margin-top:14px;
+}
+
+.slider-row{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin:32px 0 8px;
+  flex-wrap:wrap;
+}
+.slider-row label{
+  font-weight:700;
+  font-size:0.95rem;
+  white-space:nowrap;
+}
+input[type=range]{
+  flex:1;
+  min-width:160px;
+  accent-color:var(--violet);
+}
+.n-badge{
+  font-family:'JetBrains Mono', monospace;
+  font-variant-numeric:tabular-nums;
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:6px 12px;
+  font-size:0.95rem;
+  font-weight:700;
+  min-width:82px;
+  text-align:center;
+}
+button.play{
+  font-family:'Baloo 2', sans-serif;
+  font-weight:600;
+  font-size:0.95rem;
+  background:var(--violet);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:9px 18px;
+  cursor:pointer;
+  transition:transform .12s ease, opacity .12s ease;
+}
+button.play:hover{transform:translateY(-1px);}
+button.play:active{transform:translateY(0);}
+button.play:disabled{opacity:0.55;cursor:default;transform:none;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+  margin-top:24px;
+}
+@media (max-width:640px){.grid{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px 18px 16px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:4px;
+  background:var(--accent);
+}
+.card h3{
+  font-size:1.15rem;
+  color:var(--ink);
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+.card .tag{
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.95rem;
+  font-weight:700;
+  color:var(--accent);
+}
+.card p.desc{
+  font-size:0.88rem;
+  color:var(--ink-soft);
+  margin:6px 0 14px;
+  line-height:1.5;
+}
+
+.toybox{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  min-height:96px;
+  align-content:flex-start;
+  padding:10px;
+  background:var(--bg);
+  border-radius:10px;
+  margin-bottom:12px;
+}
+.toy{
+  width:16px;height:16px;
+  border-radius:5px;
+  background:var(--line);
+  transition:background .08s linear, transform .08s linear;
+}
+.toy.hit{background:var(--accent);transform:scale(1.25);}
+.toy.found{background:var(--ink);transform:scale(1.35);}
+
+.stat-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:0.85rem;
+  color:var(--ink-soft);
+}
+.stat-row .count{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700;
+  font-size:1.3rem;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+.card[data-k="o1"]{--accent:var(--teal);--bg:var(--teal-bg);}
+.card[data-k="ologn"]{--accent:var(--amber);--bg:var(--amber-bg);}
+.card[data-k="on"]{--accent:var(--violet);--bg:var(--violet-bg);}
+.card[data-k="on2"]{--accent:var(--coral);--bg:var(--coral-bg);}
+
+.chart-section{margin-top:52px;}
+.chart-section h2{font-size:1.5rem;margin-bottom:6px;}
+.chart-section p{color:var(--ink-soft);font-size:0.95rem;margin-bottom:18px;max-width:65ch;line-height:1.55;}
+.chart-card{
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+}
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-top:14px;
+  font-size:0.85rem;
+  font-weight:700;
+}
+.legend span{display:flex;align-items:center;gap:6px;}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+.footnote{
+  margin-top:40px;
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  border-top:1px solid var(--line);
+  padding-top:18px;
+  line-height:1.6;
+}
+.footnote b{color:var(--ink);}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">A visual for Big O Notation</div>
+    <h1>The Toy Box Game</h1>
+    <p>Same box of toys, four different ways to find the red car. Drag the slider to add more toys, then hit play — watch how each strategy's work grows.</p>
+  </div>
+
+  <div class="slider-row">
+    <label for="n-slider">Toys in the box</label>
+    <input type="range" id="n-slider" min="4" max="64" value="16" step="1">
+    <div class="n-badge" id="n-badge">16 toys</div>
+    <button class="play" id="play-btn">▶ Play all four</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="card" data-k="o1">
+      <h3>Labeled Cubby <span class="tag">O(1)</span></h3>
+      <p class="desc">Someone tells you the exact cubby. You reach straight there — one move, no matter the box size.</p>
+      <div class="toybox" id="box-o1"></div>
+      <div class="stat-row"><span>moves so far</span><span class="count" id="count-o1">0</span></div>
+    </div>
+
+    <div class="card" data-k="ologn">
+      <h3>Guessing Game <span class="tag">O(log n)</span></h3>
+      <p class="desc">Toys are lined up in order. Check the middle, throw away the wrong half, repeat.</p>
+      <div class="toybox" id="box-ologn"></div>
+      <div class="stat-row"><span>moves so far</span><span class="count" id="count-ologn">0</span></div>
+    </div>
+
+    <div class="card" data-k="on">
+      <h3>Check One by One <span class="tag">O(n)</span></h3>
+      <p class="desc">No labels, no order. You open every toy, left to right, until you find the car.</p>
+      <div class="toybox" id="box-on"></div>
+      <div class="stat-row"><span>moves so far</span><span class="count" id="count-on">0</span></div>
+    </div>
+
+    <div class="card" data-k="on2">
+      <h3>Compare Every Pair <span class="tag">O(n²)</span></h3>
+      <p class="desc">For every toy, you compare it against every other toy — looking for a matching pair.</p>
+      <div class="toybox" id="box-on2"></div>
+      <div class="stat-row"><span>moves so far</span><span class="count" id="count-on2">0</span></div>
+    </div>
+
+  </div>
+
+  <div class="chart-section">
+    <h2>How the work piles up</h2>
+    <p>Same idea, zoomed out: as the toy box grows from a handful to a hundred, here's how many moves each strategy takes. The dot marks your current slider position.</p>
+    <div class="chart-card">
+      <canvas id="growth-chart" width="860" height="360" style="width:100%;height:auto;display:block;"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--teal)"></i>O(1) — labeled cubby</span>
+        <span><i style="background:var(--amber)"></i>O(log n) — guessing game</span>
+        <span><i style="background:var(--violet)"></i>O(n) — one by one</span>
+        <span><i style="background:var(--coral)"></i>O(n²) — every pair</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>The point of Big O:</b> it doesn't count exact seconds — it describes how the number of moves changes as the pile gets bigger. O(1) never grows. O(log n) grows whisper-slowly. O(n) grows steadily, one move per extra toy. O(n²) grows explosively — double the toys, and the work roughly quadruples.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const slider = document.getElementById('n-slider');
+  const nBadge = document.getElementById('n-badge');
+  const playBtn = document.getElementById('play-btn');
+
+  const boxes = {
+    o1: document.getElementById('box-o1'),
+    ologn: document.getElementById('box-ologn'),
+    on: document.getElementById('box-on'),
+    on2: document.getElementById('box-on2'),
+  };
+  const counts = {
+    o1: document.getElementById('count-o1'),
+    ologn: document.getElementById('count-ologn'),
+    on: document.getElementById('count-on'),
+    on2: document.getElementById('count-on2'),
+  };
+
+  let n = parseInt(slider.value, 10);
+  let playing = false;
+  let timers = [];
+
+  function buildBoxes(){
+    Object.values(timers).forEach(clearTimeout);
+    timers = [];
+    Object.entries(boxes).forEach(([key, el])=>{
+      el.innerHTML = '';
+      const count = key === 'on2' ? n : n; // same visual count, different move math
+      for(let i=0;i<count;i++){
+        const d = document.createElement('div');
+        d.className = 'toy';
+        el.appendChild(d);
+      }
+    });
+    Object.values(counts).forEach(c=>c.textContent = '0');
+  }
+
+  function clearHits(){
+    Object.values(boxes).forEach(el=>{
+      [...el.children].forEach(c=>{ c.classList.remove('hit'); c.classList.remove('found'); });
+    });
+  }
+
+  function schedule(fn, delay){
+    const t = setTimeout(fn, delay);
+    timers.push(t);
+  }
+
+  // Each animator returns the total number of "moves" it will perform for n toys.
+  function movesFor(key, n){
+    if(key==='o1') return 1;
+    if(key==='ologn') return Math.max(1, Math.ceil(Math.log2(n)));
+    if(key==='on') return n;
+    if(key==='on2') return n*n;
+    return n;
+  }
+
+  function animate(key){
+    const el = boxes[key];
+    const kids = [...el.children];
+    const total = kids.length;
+    const target = Math.floor(Math.random()*total);
+    const step = reduceMotion ? 0 : 90;
+    let moveCount = 0;
+
+    function setCount(v){ counts[key].textContent = v; }
+
+    if(key === 'o1'){
+      schedule(()=>{
+        kids[target].classList.add('found');
+        setCount(1);
+      }, step);
+      return;
+    }
+
+    if(key === 'ologn'){
+      let lo=0, hi=total-1, i=0;
+      function step_(){
+        if(lo>hi){ return; }
+        const mid = Math.floor((lo+hi)/2);
+        moveCount++;
+        kids.forEach(k=>k.classList.remove('hit'));
+        kids[mid].classList.add(mid===target ? 'found' : 'hit');
+        setCount(moveCount);
+        if(mid===target){ return; }
+        if(mid<target) lo = mid+1; else hi = mid-1;
+        i++;
+        schedule(step_, step);
+      }
+      schedule(step_, step);
+      return;
+    }
+
+    if(key === 'on'){
+      let i=0;
+      function step_(){
+        if(i>total) return;
+        if(i>0) kids[i-1] && kids[i-1].classList.remove('hit');
+        if(i>=total) return;
+        moveCount++;
+        kids[i].classList.add(i===target ? 'found' : 'hit');
+        setCount(moveCount);
+        if(i===target) return;
+        i++;
+        schedule(step_, step);
+      }
+      schedule(step_, step);
+      return;
+    }
+
+    if(key === 'on2'){
+      // visualize as sweeping pairs; cap animation frames for large n so it stays snappy
+      const capped = Math.min(total, 22);
+      let i=0, j=0;
+      const foundI = Math.floor(Math.random()*capped);
+      const totalMoves = total*total;
+      let shown = 0;
+      function step_(){
+        if(i>=capped){ setCount(totalMoves); return; }
+        kids.forEach(k=>k.classList.remove('hit'));
+        kids[i] && kids[i].classList.add('hit');
+        if(kids[j]) kids[j].classList.add('hit');
+        shown++;
+        setCount(Math.min(totalMoves, Math.round(shown * (totalMoves/(capped*capped)))));
+        j++;
+        if(j>=capped){ j=0; i++; }
+        if(i===foundI && j===0){ kids[i] && kids[i].classList.add('found'); setCount(totalMoves); return; }
+        schedule(step_, reduceMotion ? 0 : 22);
+      }
+      schedule(step_, step);
+      return;
+    }
+  }
+
+  function playAll(){
+    if(playing) return;
+    playing = true;
+    playBtn.disabled = true;
+    playBtn.textContent = '⏳ Watching them work…';
+    clearHits();
+    buildBoxes();
+    Object.keys(boxes).forEach(k=>animate(k));
+    const longest = 1200 + n*40;
+    schedule(()=>{
+      playing = false;
+      playBtn.disabled = false;
+      playBtn.textContent = '▶ Play all four';
+    }, reduceMotion ? 300 : longest);
+  }
+
+  slider.addEventListener('input', ()=>{
+    n = parseInt(slider.value, 10);
+    nBadge.textContent = n + ' toys';
+    buildBoxes();
+    drawChart();
+  });
+
+  playBtn.addEventListener('click', playAll);
+
+  buildBoxes();
+
+  // ---------- growth chart ----------
+  const canvas = document.getElementById('growth-chart');
+  const ctx = canvas.getContext('2d');
+
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function drawChart(){
+    const W = canvas.width, H = canvas.height;
+    const padL = 46, padR = 20, padT = 20, padB = 36;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const maxN = 70;
+
+    ctx.clearRect(0,0,W,H);
+
+    const ink = cssVar('--ink');
+    const inkSoft = cssVar('--ink-soft');
+    const line = cssVar('--line');
+    const teal = cssVar('--teal');
+    const amber = cssVar('--amber');
+    const violet = cssVar('--violet');
+    const coral = cssVar('--coral');
+
+    const maxY = maxN*maxN;
+    function xFor(nv){ return padL + (nv/maxN)*plotW; }
+    function yFor(v){ return padT + plotH - (Math.sqrt(v)/Math.sqrt(maxY))*plotH; }
+
+    // grid
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 1;
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillStyle = inkSoft;
+    for(let gx=0; gx<=maxN; gx+=10){
+      const x = xFor(gx);
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+plotH); ctx.stroke();
+      ctx.fillText(gx, x-6, padT+plotH+18);
+    }
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+plotH); ctx.lineTo(padL+plotW, padT+plotH); ctx.stroke();
+    ctx.fillText('n (toys)', padL+plotW-40, padT+plotH+18);
+    ctx.save();
+    ctx.translate(14, padT+plotH/2+20);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('moves (sqrt scale)', 0, 0);
+    ctx.restore();
+
+    function plot(fn, color, width){
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width || 2.5;
+      ctx.beginPath();
+      for(let nv=1; nv<=maxN; nv++){
+        const x = xFor(nv), y = yFor(fn(nv));
+        if(nv===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+
+    plot(nv=>1, teal);
+    plot(nv=>Math.max(1,Math.log2(nv)), amber);
+    plot(nv=>nv, violet);
+    plot(nv=>nv*nv, coral);
+
+    // current-n marker
+    const markers = [
+      {fn: nv=>1, color: teal},
+      {fn: nv=>Math.max(1,Math.log2(nv)), color: amber},
+      {fn: nv=>nv, color: violet},
+      {fn: nv=>nv*nv, color: coral},
+    ];
+    const nx = xFor(Math.min(n, maxN));
+    ctx.strokeStyle = line;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(nx, padT); ctx.lineTo(nx, padT+plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    markers.forEach(m=>{
+      const y = yFor(m.fn(Math.min(n,maxN)));
+      ctx.fillStyle = m.color;
+      ctx.beginPath(); ctx.arc(nx, y, 4.5, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  drawChart();
+  window.addEventListener('resize', drawChart);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawChart);
+})();
+</script>
